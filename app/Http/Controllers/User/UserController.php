@@ -5,36 +5,37 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\User;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
 {
-
     public function index()
     {
         $products = Product::all(); // Mengambil semua produk dari database
         return view('pages.user.index', compact('products')); // Mengirim produk ke view
     }
 
-    public function show($id)
+    public function detail_product($id)
     {
-        $product = Product::findOrFail($id); // Mengambil detail produk berdasarkan ID
-
-        return view('pages.user.product.detail', compact('product')); // Mengirim produk ke view detail
+        $product = Product::findOrFail($id);
+        return view('pages.user.detail', compact('product'));
     }
- 
-    /*
-    public function show($id)
-{
-    $product = Product::findOrFail($id);
 
-    return view('pages.user.product.detail', compact('products'));
-}
+    public function purchase($productId, $userId)
+    {
+        $product = Product::findOrFail($productId);
+        $user = User::findOrFail($userId);
 
-   public function index(){
+        if ($user->point >= $product->price) {
+            $totalPoints = $user->point - $product->price;
+            $user->update(['point' => $totalPoints]);
 
-        $products = Product::all();
-
-        return view('pages.user.index', compact('products'));
+            Alert::success('Berhasil!', 'Produk berhasil dibeli!');
+            return redirect()->back();
+        } else {
+            Alert::error('Gagal!', 'Point anda tidak cukup!');
+            return redirect()->back();
+        }
     }
-        */
 }
